@@ -1,0 +1,170 @@
+.container {
+    font-family: Arial, sans-serif;
+    padding: 0 20px; /* Adjusted padding for better spacing */
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: center;
+    background-color: #f8f8f8;
+    padding: 20px 0; /* Increased padding for better spacing */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .navLink {
+    margin: 0 30px; /* Increased margin for more spacing between links */
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 24px; /* Larger font size */
+  }
+  
+  .navLink:hover {
+    color: #0070f3;
+  }
+  
+  .homeSection {
+    text-align: center;
+    margin: 100px 0; /* Increased margin for more space before next section */
+  }
+  
+  .title {
+    font-size: 4rem; /* Very large font size */
+    font-weight: bold;
+    margin-bottom: 20px; /* Added margin for spacing below the title */
+  }
+  
+  .cardNinja {
+    background: linear-gradient(45deg, orange, red, blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+  }
+  
+  .description {
+    font-size: 2rem; /* Larger font size for better readability */
+    margin: 20px 0; /* Increased margin for better spacing */
+  }
+  
+  .getStartedButton {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 15px 30px; /* Increased padding for larger button */
+    font-size: 1.5rem; /* Larger font size for button text */
+    cursor: pointer;
+    margin-top: 30px; /* Increased margin for spacing above button */
+  }
+  
+  .getStartedButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .featuresSection, .teamSection {
+    padding: 100px 0; /* Increased padding for more space between sections */
+    text-align: center;
+  }
+  
+  .sectionTitle {
+    font-size: 3rem; /* Large font size for section titles */
+    font-weight: bold;
+    margin-bottom: 30px; /* Increased margin for spacing below section titles */
+  }
+  
+  .featuresList {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Added gap between feature boxes */
+  }
+  
+  .featureItem {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 250px; /* Fixed width for feature boxes */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center; /* Center-align text */
+  }
+  
+  .featureItem:hover {
+    transform: translateY(-10px); /* Lift effect */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Increased shadow on hover */
+  }
+  
+  .featureItem h3 {
+    font-size: 1.75rem; /* Font size for feature titles */
+    margin-bottom: 10px; /* Margin for spacing below titles */
+    color: #333; /* Text color for titles */
+  }
+  
+  .featureItem p {
+    font-size: 1.2rem; /* Font size for feature descriptions */
+    color: #666; /* Text color for descriptions */
+  }
+  
+  .teamDescription {
+    font-size: 1.5rem; /* Larger font size for team description */
+    margin-top: 20px; /* Added margin for spacing above description */
+  }
+  
+  .teamContainer {
+    display: flex;
+    justify-content: center;
+    gap: 50px; /* Space between team members */
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  
+  .teamMember {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .teamMemberImage {
+    width: 200px; /* Fixed width for the circular box */
+    height: 200px; /* Fixed height for the circular box */
+    border-radius: 50%; /* Circular shape */
+    object-fit: cover; /* Ensure the image fills the circle */
+    overflow: hidden; /* Hide any part of the image that overflows the circle */
+    border: 3px solid #333; /* Optional: Add a border for better visibility */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for better effect */
+  }
+  
+  .teamMemberName {
+    margin-top: 10px;
+    font-size: 1.2rem; /* Font size for team member names */
+  }
+  
+  .signInPrompt {
+    text-align: center;
+    font-size: 1.5rem; /* Larger font size for prompt */
+  }
+  
+  .signInButton {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px; /* Added padding for button */
+    font-size: 1.2rem; /* Increased font size for button text */
+  }
+  
+  .signedInContent {
+    text-align: center; /* Center-align signed-in content */
+  }
+  
+  .welcomeMessage {
+    font-size: 2rem; /* Font size for welcome message */
+    font-weight: bold;
+    margin-bottom: 30px; /* Margin for spacing below welcome message */
+  }
+  
+  .flashcardSection {
+    padding: 50px 0; /* Adjust padding as needed */
+  }
+  
