@@ -332,7 +332,7 @@ export default function Generate() {
         <DialogTitle>Search Flashcards</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Please enter the name of the flashcard set you'd like to search for.
+            Please enter the name of the flashcard set you would like to search for.
           </DialogContentText>
           <TextField
             autoFocus
