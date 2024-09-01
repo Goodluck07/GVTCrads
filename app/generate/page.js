@@ -305,20 +305,22 @@ export default function Generate() {
         <DialogTitle>Save Flashcard Set</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter a name for your flashcard set.
+            Please enter a name for your flashcard set.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
             label="Set Name"
-            type="text"
             fullWidth
+            variant="outlined"
             value={setName}
             onChange={(e) => setSetName(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
           <Button onClick={saveFlashcards} color="primary">
             Save
           </Button>
@@ -326,126 +328,122 @@ export default function Generate() {
       </Dialog>
 
       {/* Search Flashcards Dialog */}
-      <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)} maxWidth="md">
+      <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)}>
         <DialogTitle>Search Flashcards</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter the name of the flashcard set you want to view.
+            Please enter the name of the flashcard set you'd like to search for.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Flashcard Set Name"
-            type="text"
+            label="Set Name"
             fullWidth
+            variant="outlined"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleSearchFlashcards()
-              }
-            }}
           />
-          <Box sx={{ mt: 2 }}>
-            <Button variant="contained" color="primary" onClick={handleSearchFlashcards}>
-              Search
-            </Button>
-          </Box>
-          {savedFlashcards.length > 0 && (
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h5" component="h2" gutterBottom>
-                Saved Flashcards
-              </Typography>
-              <Grid container spacing={2}>
-                {savedFlashcards.map((flashcard, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSearchDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSearchFlashcards} color="primary">
+            Search
+          </Button>
+        </DialogActions>
+
+        {savedFlashcards.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              Saved Flashcards for {searchName}
+            </Typography>
+            <Grid container spacing={2}>
+              {savedFlashcards.map((flashcard, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card
+                    sx={{
+                      height: '200px',
+                      width: '200px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      border: '1px solid #ddd',
+                      boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                      borderRadius: '8px',
+                      position: 'relative',
+                      perspective: '1000px',
+                      '&:hover .card-inner': {
+                        transform: 'rotateY(180deg)',
+                      },
+                    }}
+                  >
+                    <Box
+                      className="card-inner"
                       sx={{
-                        height: '200px',
-                        width: '200px',
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute',
+                        transformStyle: 'preserve-3d',
+                        transition: 'transform 0.6s',
                         display: 'flex',
-                        justifyContent: 'center',
                         alignItems: 'center',
-                        textAlign: 'center',
-                        border: '1px solid #ddd',
-                        boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                        borderRadius: '8px',
-                        position: 'relative',
-                        perspective: '1000px',
-                        '&:hover .card-inner': {
-                          transform: 'rotateY(180deg)',
-                        },
+                        justifyContent: 'center',
                       }}
                     >
                       <Box
-                        className="card-inner"
+                        className="card-front"
                         sx={{
+                          position: 'absolute',
                           width: '100%',
                           height: '100%',
-                          position: 'absolute',
-                          transformStyle: 'preserve-3d',
-                          transition: 'transform 0.6s',
+                          backfaceVisibility: 'hidden',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          backgroundColor: '#fff',
+                          borderRadius: '8px',
+                          boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                          p: 2,
+                          fontSize: '16px',
+                          overflow: 'auto',
                         }}
                       >
-                        <Box
-                          className="card-front"
-                          sx={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#fff',
-                            borderRadius: '8px',
-                            boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                            p: 2,
-                            fontSize: '16px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          <Typography variant="body1" sx={{ m: 0 }}>
-                            {flashcard.front}
-                          </Typography>
-                        </Box>
-                        <Box
-                          className="card-back"
-                          sx={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#f5f5f5',
-                            borderRadius: '8px',
-                            boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                            p: 2,
-                            fontSize: '16px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          <Typography variant="body2" color="textSecondary" sx={{ m: 0 }}>
-                            {flashcard.back}
-                          </Typography>
-                        </Box>
+                        <Typography variant="body1" sx={{ m: 0 }}>
+                          {flashcard.front}
+                        </Typography>
                       </Box>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSearchDialogOpen(false)}>Close</Button>
-        </DialogActions>
+                      <Box
+                        className="card-back"
+                        sx={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          backfaceVisibility: 'hidden',
+                          transform: 'rotateY(180deg)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f5f5f5',
+                          borderRadius: '8px',
+                          boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                          p: 2,
+                          fontSize: '16px',
+                          overflow: 'auto',
+                        }}
+                      >
+                        <Typography variant="body2" color="textSecondary" sx={{ m: 0 }}>
+                          {flashcard.back}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
       </Dialog>
     </Container>
   )
