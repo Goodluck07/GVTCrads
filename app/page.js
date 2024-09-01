@@ -49,7 +49,7 @@ export default function Home() {
             GVTCards
           </Typography>
           <SignedOut>
-            <Button color="inherit" href="https://thorough-badger-42.accounts.dev/sign-in">Login</Button>
+            <Button color="inherit" href="/sign-in">Login</Button>
             <Button color="inherit" href="https://thorough-badger-42.accounts.dev/sign-up">Sign Up</Button>
           </SignedOut>
           <SignedIn>
