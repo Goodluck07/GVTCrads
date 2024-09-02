@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Container,
@@ -17,10 +17,9 @@ import {
   DialogActions,
   CircularProgress
 } from '@mui/material'
-import { useUser, SignedIn, UserButton } from '@clerk/nextjs'
-import { doc, collection, getDoc, writeBatch, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../../firebase'; // Go up two directories to reach the root
-
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { doc, collection, setDoc, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../../firebase'
 
 export default function Generate() {
   const [text, setText] = useState('')
@@ -31,8 +30,17 @@ export default function Generate() {
   const [savedFlashcards, setSavedFlashcards] = useState([])
   const [searchName, setSearchName] = useState('')
   const [searchDialogOpen, setSearchDialogOpen] = useState(false)
-  const { user } = useUser()
+  const [user, setUser] = useState(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const auth = getAuth()
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const handleSubmit = async () => {
     if (!text.trim()) {
@@ -77,10 +85,10 @@ export default function Generate() {
     }
 
     try {
-      const userDocRef = doc(db, 'users', user.id)
+      const userDocRef = doc(db, 'users', user.uid)
       const setDocRef = doc(collection(userDocRef, 'flashcardSets'), setName)
 
-      await setDocRef.set({ flashcards })
+      await setDoc(setDocRef, { flashcards })
 
       alert('Flashcards saved successfully!')
       handleCloseDialog()
@@ -103,7 +111,7 @@ export default function Generate() {
     }
 
     try {
-      const userDocRef = doc(db, 'users', user.id)
+      const userDocRef = doc(db, 'users', user.uid)
       const flashcardSetsRef = collection(userDocRef, 'flashcardSets')
       const q = query(flashcardSetsRef, where('__name__', '==', searchName))
       const querySnapshot = await getDocs(q)
@@ -121,23 +129,63 @@ export default function Generate() {
     }
   }
 
+  const handleSignOut = () => {
+    const auth = getAuth()
+    auth.signOut()
+    router.push('/') // Redirect to the main page of unsigned-in users
+  }
+
   return (
     <Container maxWidth="md" sx={{ position: 'relative' }}>
       {/* User Button */}
       <Box sx={{
         position: 'absolute',
-        top: 1,
-        right: 1,
+        top: 16,
+        right: 16,
         zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        '@media (max-width: 600px)': {
+          top: 8,
+          right: 8,
+        },
       }}>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+        {user ? (
+          <Box>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              {user.email}
+            </Typography>
+            <Button variant="contained" color="primary" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </Box>
+        ) : (
+          <Button variant="contained" color="primary" onClick={() => router.push('/sign-in')}>
+            Sign In
+          </Button>
+        )}
       </Box>
-
+  
+      {/* Back to Home Button */}
+      <Box sx={{
+        position: 'buttom',
+        top: 16,
+        left: 16,
+        zIndex: 10,
+        '@media (max-width: 600px)': {
+          top: 8,
+          left: 8,
+        },
+      }}>
+        <Button variant="contained" color="secondary" onClick={() => router.push('/')}>
+          Back to Home
+        </Button>
+      </Box>
+  
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Enhance your knowledge just by typing in any word you want to learn more about below!
+          Enhance your knowledge!
         </Typography>
         <TextField
           value={text}
@@ -158,159 +206,127 @@ export default function Generate() {
         >
           Generate Flashcards
         </Button>
-
+  
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <CircularProgress />
           </Box>
         )}
-
+  
         {flashcards.length > 0 && (
-          <>
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h5" component="h2" gutterBottom>
-                Generated Flashcards
-              </Typography>
-              <Grid container spacing={2}>
-                {flashcards.map((flashcard, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Generated Flashcards
+            </Typography>
+            <Grid container spacing={2}>
+              {flashcards.map((flashcard, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card
+                    sx={{
+                      height: '200px',
+                      width: '200px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      border: '1px solid #ddd',
+                      boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                      borderRadius: '8px',
+                      position: 'relative',
+                      perspective: '1000px',
+                      '&:hover .card-inner': {
+                        transform: 'rotateY(180deg)',
+                      },
+                    }}
+                  >
+                    <Box
+                      className="card-inner"
                       sx={{
-                        height: '200px',
-                        width: '200px',
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute',
+                        transformStyle: 'preserve-3d',
+                        transition: 'transform 0.6s',
                         display: 'flex',
-                        justifyContent: 'center',
                         alignItems: 'center',
-                        textAlign: 'center',
-                        border: '1px solid #ddd',
-                        boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                        borderRadius: '8px',
-                        position: 'relative',
-                        perspective: '1000px',
-                        '&:hover .card-inner': {
-                          transform: 'rotateY(180deg)',
-                        },
+                        justifyContent: 'center',
                       }}
                     >
                       <Box
-                        className="card-inner"
+                        className="card-front"
                         sx={{
+                          position: 'absolute',
                           width: '100%',
                           height: '100%',
-                          position: 'absolute',
-                          transformStyle: 'preserve-3d',
-                          transition: 'transform 0.6s',
+                          backfaceVisibility: 'hidden',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          backgroundColor: '#fff',
+                          borderRadius: '8px',
+                          boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                          p: 2,
+                          fontSize: '16px',
+                          overflow: 'auto',
                         }}
                       >
-                        <Box
-                          className="card-front"
-                          sx={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#fff',
-                            borderRadius: '8px',
-                            boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                            p: 2,
-                            fontSize: '16px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          <Typography variant="body1" sx={{ m: 0 }}>
-                            {flashcard.front}
-                          </Typography>
-                        </Box>
-                        <Box
-                          className="card-back"
-                          sx={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#f5f5f5',
-                            borderRadius: '8px',
-                            boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                            p: 2,
-                            fontSize: '16px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          <Typography variant="body2" color="textSecondary" sx={{ m: 0 }}>
-                            {flashcard.back}
-                          </Typography>
-                        </Box>
+                        <Typography variant="body1" sx={{ m: 0 }}>
+                          {flashcard.front}
+                        </Typography>
                       </Box>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  if (user) {
-                    handleOpenDialog()
-                  } else {
-                    alert('To use this feature, you have to be signed in.')
-                  }
-                }}
-              >
+                      <Box
+                        className="card-back"
+                        sx={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          backfaceVisibility: 'hidden',
+                          transform: 'rotateY(180deg)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f5f5f5',
+                          borderRadius: '8px',
+                          boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                          p: 2,
+                          fontSize: '16px',
+                          overflow: 'auto',
+                        }}
+                      >
+                        <Typography variant="body1" sx={{ m: 0 }}>
+                          {flashcard.back}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+            <Box sx={{ mt: 4 }}>
+              <Button variant="contained" color="primary" onClick={handleOpenDialog}>
                 Save Flashcards
               </Button>
+              <Button variant="contained" color="secondary" onClick={() => setSearchDialogOpen(true)} sx={{ ml: 2 }}>
+                View Saved Flashcards
+              </Button>
             </Box>
-          </>
+          </Box>
         )}
-
-        {/* View Saved Flashcards Button */}
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => {
-              if (user) {
-                setSearchDialogOpen(true)
-              } else {
-                alert('To use this feature, you have to be signed in.')
-              }
-            }}
-          >
-            View Saved Flashcards
-          </Button>
-        </Box>
-        
-        {/* Back to Home Page Button */}
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-          <Button variant="outlined" color="secondary" onClick={() => router.push('/')}>
-            Back to Home Page
-          </Button>
-        </Box>
       </Box>
 
-      {/* Save Flashcard Set Dialog */}
+      {/* Save Flashcards Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Save Flashcard Set</DialogTitle>
+        <DialogTitle>Save Flashcards</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Please enter a name for your flashcard set.
+            Enter a name for your flashcard set:
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Set Name"
+            id="name"
+            label="Flashcard Set Name"
+            type="text"
             fullWidth
             variant="outlined"
             value={setName}
@@ -318,26 +334,24 @@ export default function Generate() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={saveFlashcards} color="primary">
-            Save
-          </Button>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={saveFlashcards}>Save</Button>
         </DialogActions>
       </Dialog>
 
       {/* Search Flashcards Dialog */}
       <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)}>
-        <DialogTitle>Search Flashcards</DialogTitle>
+        <DialogTitle>Search Saved Flashcards</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Please enter the name of the flashcard set you would like to search for.
+            Enter the name of the flashcard set you want to view:
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Set Name"
+            id="search-name"
+            label="Flashcard Set Name"
+            type="text"
             fullWidth
             variant="outlined"
             value={searchName}
@@ -345,19 +359,12 @@ export default function Generate() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSearchDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSearchFlashcards} color="primary">
-            Search
-          </Button>
+          <Button onClick={() => setSearchDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleSearchFlashcards}>Search</Button>
         </DialogActions>
-
         {savedFlashcards.length > 0 && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" component="h2" gutterBottom>
-              Saved Flashcards for {searchName}
-            </Typography>
+          <DialogContent>
+            <Typography variant="h6">Saved Flashcards:</Typography>
             <Grid container spacing={2}>
               {savedFlashcards.map((flashcard, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
@@ -433,7 +440,7 @@ export default function Generate() {
                           overflow: 'auto',
                         }}
                       >
-                        <Typography variant="body2" color="textSecondary" sx={{ m: 0 }}>
+                        <Typography variant="body1" sx={{ m: 0 }}>
                           {flashcard.back}
                         </Typography>
                       </Box>
@@ -442,7 +449,7 @@ export default function Generate() {
                 </Grid>
               ))}
             </Grid>
-          </Box>
+          </DialogContent>
         )}
       </Dialog>
     </Container>
